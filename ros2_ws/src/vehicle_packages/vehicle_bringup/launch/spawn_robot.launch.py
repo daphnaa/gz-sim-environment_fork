@@ -13,15 +13,15 @@ robot_coordinates = {
     # 0: [-1.0, -1.0, 1.65], 
     # 0: [-5.0, 0.0, 2.5], # cave world
     # 0: [-15.0, -15.0, 2.5], # marsyard
-    0: [0.0, 0.0, 1.0], # corridor
-    1: [0.0, 5.0, 1.65],
-    2: [5.0, 5.0, 1.65],
+    0: [1.0, -0.5, 30.0], # corridor
+    1: [7.0, 1.0, 15.0],
+    2: [5.0, -0.5, 20.0],
     3: [-1.0, 8.0, 1.65],
     4: [7.0, 8.0, 1.65],
     5: [7.0, 8.0, 1.65]
 }
 
-robot_model_type = "small_vehicle"
+robot_model_type = "typhoon_drone"
 # you can choose from:
 # model, model_with_2_lidar, small_vehicle, small_vehicle_vert_lidar, small_vehicle_2d_lidar
 
@@ -35,8 +35,8 @@ def spawn_robot(context: LaunchContext, namespace: LaunchConfiguration):
     robot_idx = int(robot_idx_str)
     print(f"IDX of the robot: {robot_idx}")
 
-    erb_file = os.path.join(pkg_project_description, 'models', '4_wheel_differential', robot_model_type + '.erb')
-    rb_file = os.path.join(pkg_project_description, 'models', '4_wheel_differential', 'model.rb')
+    erb_file = os.path.join(pkg_project_description, 'models', 'drone', robot_model_type + '.erb')
+    rb_file = os.path.join(pkg_project_description, 'models', 'drone', 'generate_drone_model.rb')
     print(f"ruby {rb_file} \"{robot_ns}\" {erb_file} /tmp/model_{robot_idx_str}.sdf {robot_coordinates[robot_idx][0]} {robot_coordinates[robot_idx][1]}")
     process = subprocess.run(f"ruby {rb_file} \"{robot_ns}\" {erb_file} /tmp/model_{robot_idx_str}.sdf {robot_coordinates[robot_idx][0]} {robot_coordinates[robot_idx][1]}", shell=True, check=True)
     

@@ -1,0 +1,29 @@
+require 'erb'
+
+# Get command-line arguments
+robot_name = ARGV[0] || "default_robot_name"
+erb_path = ARGV[1] || "default_erb_path"
+sdf_path = ARGV[2] || "default_sdf_path"
+robot_x = ARGV[3] || "5.0"
+robot_y = ARGV[4] || "5.0"
+body_color = ARGV[5] || "0.0 0.0 1.0 1.0"  # Default blue for body
+rotor_color = ARGV[6] || "1.0 0.0 0.0 1.0"  # Default red for rotors
+
+# Prepare variables hash
+variables = {
+  robot_name: robot_name,
+  robot_x: robot_x,
+  robot_y: robot_y,
+  body_color: body_color,
+  rotor_color: rotor_color
+}
+
+# Load and process the ERB template
+template_file = File.read(erb_path)
+template = ERB.new(template_file)
+result = template.result_with_hash(variables)
+
+# Output or save the result
+File.write(sdf_path, result)
+
+puts "Generated SDF file saved to #{sdf_path}"

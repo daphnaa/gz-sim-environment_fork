@@ -23,7 +23,7 @@ def generate_launch_description():
             os.path.join(pkg_ros_gz_sim, "launch", "gz_sim.launch.py")
         ),
         launch_arguments={"gz_version": "8",
-                          "gz_args": "--headless-rendering -r clearpath_playpen.sdf"}.items(),
+                          "gz_args": "--headless-rendering -r indoor.sdf"}.items(),
     )
     # clearpath_playpen.sdf
     # pittsburgh_mine.sdf
@@ -54,7 +54,7 @@ def generate_launch_description():
             ),
             launch_arguments={"robot_ns": f"robot_{i}/"}.items(),
         )
-        for i in range(0, 1)
+        for i in range(0, 3)
     ]
 
     return LaunchDescription(

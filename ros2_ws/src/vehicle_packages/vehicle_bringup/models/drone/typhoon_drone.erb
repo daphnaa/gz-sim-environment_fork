@@ -1,0 +1,251 @@
+<?xml version="1.0" ?>
+<sdf version="1.8">
+
+<%
+  robot_name = robot_name
+  robot_x = robot_x
+  robot_y = robot_y
+  # Color for different parts (body, rotors, etc.)
+  body_color = body_color || "0.0 0.0 1.0 1.0"  # Default: blue
+  rotor_color = rotor_color || "1.0 0.0 0.0 1.0"  # Default: red
+%>
+
+<model name="<%= robot_name.to_s %>drone" canonical_link="<%= robot_name.to_s %>base_footprint">
+
+    <!-- Base Footprint -->
+    <link name="<%= robot_name.to_s %>base_footprint">
+        <pose relative_to="__model__">0 0 0 0 0 0</pose>
+    </link>
+
+    <!-- Drone Body -->
+    <link name="<%= robot_name.to_s %>body">
+        <pose relative_to="__model__">0 0 0 0 0 0</pose>
+        <visual name="<%= robot_name.to_s %>body_visual">
+            <geometry>
+                <cylinder>
+                    <radius>0.3</radius>
+                    <length>0.1</length>
+                </cylinder>
+            </geometry>
+            <material>
+                <ambient>0.0 0.0 1.0 1.0</ambient>
+                <diffuse>0.0 0.0 1.0 1.0</diffuse>
+                <specular>0.0 0.0 1.0 1.0</specular>
+            </material>
+        </visual>
+        <collision name="<%= robot_name.to_s %>body_collision">
+            <geometry>
+                <cylinder>
+                    <radius>0.3</radius>
+                    <length>0.1</length>
+                </cylinder>
+            </geometry>
+        </collision>
+    </link>
+
+    <!-- Rotors -->
+    <!-- Front Left Rotor -->
+    <link name='<%= robot_name.to_s %>_front_left_rotor'>
+        <pose relative_to='<%= robot_name.to_s %>_body'>
+            0.2 0.2 0.1 0 0 0
+        </pose>
+        <visual name='<%= robot_name.to_s %>_front_left_rotor_visual'>
+            <geometry>
+                <cylinder>
+                    <radius>0.05</radius>
+                    <length>0.02</length>
+                </cylinder>
+            </geometry>
+            <material>
+                <ambient><%= rotor_color %></ambient>
+                <diffuse><%= rotor_color %></diffuse>
+                <specular><%= rotor_color %></specular>
+            </material>
+        </visual>
+        <collision name='<%= robot_name.to_s %>_front_left_rotor_collision'>
+            <geometry>
+                <cylinder>
+                    <radius>0.05</radius>
+                    <length>0.02</length>
+                </cylinder>
+            </geometry>
+        </collision>
+    </link>
+
+    <!-- Rear Left Rotor -->
+    <link name='<%= robot_name.to_s %>_rear_left_rotor'>
+        <pose relative_to='<%= robot_name.to_s %>_body'>
+            -0.2 0.2 0.1 0 0 0
+        </pose>
+        <visual name='<%= robot_name.to_s %>_rear_left_rotor_visual'>
+            <geometry>
+                <cylinder>
+                    <radius>0.05</radius>
+                    <length>0.02</length>
+                </cylinder>
+            </geometry>
+            <material>
+                <ambient><%= rotor_color %></ambient>
+                <diffuse><%= rotor_color %></diffuse>
+                <specular><%= rotor_color %></specular>
+            </material>
+        </visual>
+        <collision name='<%= robot_name.to_s %>_rear_left_rotor_collision'>
+            <geometry>
+                <cylinder>
+                    <radius>0.05</radius>
+                    <length>0.02</length>
+                </cylinder>
+            </geometry>
+        </collision>
+    </link>
+
+    <!-- Front Right Rotor -->
+    <link name='<%= robot_name.to_s %>_front_right_rotor'>
+        <pose relative_to='<%= robot_name.to_s %>_body'>
+            0.2 -0.2 0.1 0 0 0
+        </pose>
+        <visual name='<%= robot_name.to_s %>_front_right_rotor_visual'>
+            <geometry>
+                <cylinder>
+                    <radius>0.05</radius>
+                    <length>0.02</length>
+                </cylinder>
+            </geometry>
+            <material>
+                <ambient><%= rotor_color %></ambient>
+                <diffuse><%= rotor_color %></diffuse>
+                <specular><%= rotor_color %></specular>
+            </material>
+        </visual>
+        <collision name='<%= robot_name.to_s %>_front_right_rotor_collision'>
+            <geometry>
+                <cylinder>
+                    <radius>0.05</radius>
+                    <length>0.02</length>
+                </cylinder>
+            </geometry>
+        </collision>
+    </link>
+
+    <!-- Rear Right Rotor -->
+    <link name='<%= robot_name.to_s %>_rear_right_rotor'>
+        <pose relative_to='<%= robot_name.to_s %>_body'>
+            -0.2 -0.2 0.1 0 0 0
+        </pose>
+        <visual name='<%= robot_name.to_s %>_rear_right_rotor_visual'>
+            <geometry>
+                <cylinder>
+                    <radius>0.05</radius>
+                    <length>0.02</length>
+                </cylinder>
+            </geometry>
+            <material>
+                <ambient><%= rotor_color %></ambient>
+                <diffuse><%= rotor_color %></diffuse>
+                <specular><%= rotor_color %></specular>
+            </material>
+        </visual>
+        <collision name='<%= robot_name.to_s %>_rear_right_rotor_collision'>
+            <geometry>
+                <cylinder>
+                    <radius>0.05</radius>
+                    <length>0.02</length>
+                </cylinder>
+            </geometry>
+        </collision>
+    </link>
+
+    <!-- IMU Sensor -->
+    <sensor name="<%= robot_name.to_s %>_imu" type="imu">
+        <pose>0 0 0 0 0 0</pose>
+        <always_on>true</always_on>
+        <update_rate>50</update_rate>
+        <visualize>false</visualize>
+        <topic><%= robot_name.to_s %>_imu</topic>
+    </sensor>
+
+    <!-- Camera Sensor -->
+    <sensor name="<%= robot_name.to_s %>_camera" type="camera">
+        <pose>0.05 0 0.5 0 0 0</pose>
+        <camera>
+            <horizontal_fov>1.39626</horizontal_fov>
+            <image>
+                <width>640</width>
+                <height>480</height>
+            </image>
+            <clip>
+                <near>0.1</near>
+                <far>100.0</far>
+            </clip>
+        </camera>
+        <always_on>true</always_on>
+        <update_rate>30</update_rate>
+        <visualize>false</visualize>
+        <topic><%= robot_name.to_s %>_camera</topic>
+    </sensor>
+
+    <!-- LIDAR Sensor -->
+    <sensor name="<%= robot_name.to_s %>_lidar" type="gpu_lidar">
+        <pose>0 0 0.5 0 0 0</pose>
+        <gpu_lidar>
+            <scan>
+                <horizontal>
+                    <samples>360</samples>
+                    <resolution>0.01</resolution>
+                    <min_angle>-3.1415</min_angle>
+                    <max_angle>3.1415</max_angle>
+                </horizontal>
+            </scan>
+            <range>
+                <min>0.2</min>
+                <max>20.0</max>
+                <resolution>0.01</resolution>
+            </range>
+        </gpu_lidar>
+        <always_on>true</always_on>
+        <update_rate>50</update_rate>
+        <visualize>false</visualize>
+        <topic><%= robot_name.to_s %>_lidar</topic>
+    </sensor>
+
+    <!-- Joints -->
+    <joint name="<%= robot_name.to_s %>_front_left_rotor_joint" type="fixed">
+        <parent><%= robot_name.to_s %>base_footprint</parent>
+        <child><%= robot_name.to_s %>_front_left_rotor</child>
+        <pose relative_to="<%= robot_name.to_s %>base_footprint">0.2 0.2 0.1 0 0 0</pose>
+    </joint>
+
+    <joint name="<%= robot_name.to_s %>_rear_left_rotor_joint" type="fixed">
+        <parent><%= robot_name.to_s %>base_footprint</parent>
+        <child><%= robot_name.to_s %>_rear_left_rotor</child>
+        <pose relative_to="<%= robot_name.to_s %>base_footprint">-0.2 0.2 0.1 0 0 0</pose>
+    </joint>
+
+    <joint name="<%= robot_name.to_s %>_front_right_rotor_joint" type="fixed">
+        <parent><%= robot_name.to_s %>base_footprint</parent>
+        <child><%= robot_name.to_s %>_front_right_rotor</child>
+        <pose relative_to="<%= robot_name.to_s %>base_footprint">0.2 -0.2 0.1 0 0 0</pose>
+    </joint>
+
+    <joint name="<%= robot_name.to_s %>_rear_right_rotor_joint" type="fixed">
+        <parent><%= robot_name.to_s %>base_footprint</parent>
+        <child><%= robot_name.to_s %>_rear_right_rotor</child>
+        <pose relative_to="<%= robot_name.to_s %>base_footprint">-0.2 -0.2 0.1 0 0 0</pose>
+    </joint>
+
+    <joint name="<%= robot_name.to_s %>_camera_joint" type="fixed">
+        <parent><%= robot_name.to_s %>base_footprint</parent>
+        <child><%= robot_name.to_s %>_camera</child>
+        <pose relative_to="<%= robot_name.to_s %>base_footprint">0.05 0 0.5 0 0 0</pose>
+    </joint>
+
+    <joint name="<%= robot_name.to_s %>_lidar_joint" type="fixed">
+        <parent><%= robot_name.to_s %>base_footprint</parent>
+        <child><%= robot_name.to_s %>_lidar</child>
+        <pose relative_to="<%= robot_name.to_s %>base_footprint">0 0 0.5 0 0 0</pose>
+    </joint>
+
+</model>
+
+</sdf>

@@ -21,7 +21,7 @@ def generate_launch_description():
 
     world_arg = DeclareLaunchArgument(
         name="world",
-        default_value="marsyard2020_walls.sdf",
+        default_value="indoor.sdf",
         description="Name of the Gazebo world file (SDF) in gz_sim_worlds/worlds/"
     )
     world_file = LaunchConfiguration("world")
@@ -85,6 +85,7 @@ def generate_launch_description():
         parameters=[
             {
                 "qos_overrides./tf_static.publisher.durability": "transient_local",
+                "use_sim_time": True,
             }
         ],
         output="screen",
@@ -95,10 +96,10 @@ def generate_launch_description():
             PythonLaunchDescriptionSource(
                 os.path.join(pkg_project_gazebo, "launch", "vehicle_gz.launch.py")
             ),
-            # launch_arguments={"robot_ns": f"robot_{i}/"}.items(),
-            launch_arguments={"robot_ns": ""}.items(),
+            launch_arguments={"robot_ns": f"robot_{i}/"}.items(),
+            # launch_arguments={"robot_ns": ""}.items(),
         )
-        for i in range(0, 1)
+        for i in range(0, 3)
     ]
 
     return LaunchDescription(
