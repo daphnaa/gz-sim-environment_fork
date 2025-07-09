@@ -13,19 +13,19 @@ robot_coordinates = {
     # 0: [-1.0, -1.0, 1.65], 
     # 0: [-5.0, 0.0, 2.5], # cave world
     # 0: [-15.0, -15.0, 2.5], # marsyard
-    0: [1.0, -0.5, 30.0], # corridor
-    1: [7.0, 1.0, 15.0],
-    2: [5.0, -0.5, 20.0],
+    0: [1.0, -0.5, 1.0], # corridor
+    1: [7.0, 1.0, 1.0],
+    2: [5.0, -0.5, 2.0],
     3: [-1.0, 8.0, 1.65],
     4: [7.0, 8.0, 1.65],
     5: [7.0, 8.0, 1.65]
 }
 
-robot_model_type = "typhoon_drone"
+robot_model_type = "small_vehicle"
 # you can choose from:
 # model, model_with_2_lidar, small_vehicle, small_vehicle_vert_lidar, small_vehicle_2d_lidar
 
-def spawn_robot(context: LaunchContext, namespace: LaunchConfiguration):
+def spawn_robot(context: LaunchContext, namespace: LaunchConfiguration, body_color: LaunchConfiguration, rotor_color: LaunchConfiguration):
     pkg_project_description = get_package_share_directory("vehicle_bringup")
     robot_ns = namespace.perform(context)
     if(robot_ns == ""):
@@ -35,14 +35,32 @@ def spawn_robot(context: LaunchContext, namespace: LaunchConfiguration):
     robot_idx = int(robot_idx_str)
     print(f"IDX of the robot: {robot_idx}")
 
-    erb_file = os.path.join(pkg_project_description, 'models', 'drone', robot_model_type + '.erb')
-    rb_file = os.path.join(pkg_project_description, 'models', 'drone', 'generate_drone_model.rb')
+    erb_file = os.path.join(pkg_project_description, 'models', '4_wheel_differential', robot_model_type + '.erb')
+    rb_file = os.path.join(pkg_project_description, 'models', '4_wheel_differential', 'model.rb')
     print(f"ruby {rb_file} \"{robot_ns}\" {erb_file} /tmp/model_{robot_idx_str}.sdf {robot_coordinates[robot_idx][0]} {robot_coordinates[robot_idx][1]}")
     process = subprocess.run(f"ruby {rb_file} \"{robot_ns}\" {erb_file} /tmp/model_{robot_idx_str}.sdf {robot_coordinates[robot_idx][0]} {robot_coordinates[robot_idx][1]}", shell=True, check=True)
-    
+
     with open(f"/tmp/model_{robot_idx_str}.sdf", 'r') as infp:
         robot_desc = infp.read()
     
+    # # sdf_file = os.path.join(pkg_project_description, 'models', 'drone', 'typhoon_h480/typhoon_h480.sdf')
+    # # print(f"Loading model from {sdf_file}")
+
+    # # # # Accessing body and rotor colors by using .perform(context)
+    # # # body_color_value = body_color.perform(context)
+    # # # rotor_color_value = rotor_color.perform(context)
+
+    # # # print(f"Replacing body color: {body_color_value}, rotor color: {rotor_color_value}")
+
+    # # Read the existing SDF file
+    # # with open(sdf_file, 'r') as infp:
+    # #     robot_desc = infp.read()
+
+    # # # Replace color placeholders in the SDF file with the passed parameters
+
+    # robot_desc = robot_desc.replace("<body_color>", body_color_value)
+    # robot_desc = robot_desc.replace("<rotor_color>", rotor_color_value)
+
     twist_mux_param_file = os.path.join(pkg_project_description, 'params', 'twist_mux.yaml')
 
     # Spawn a robot inside a simulation
@@ -189,8 +207,24 @@ def generate_launch_description():
         description="Robot namespace",
     )
 
+    body_color = DeclareLaunchArgument(
+        "body_color",
+        default_value="1.0 0.0 0.0 1.0",  # Default Red color
+        description="Body color for the robot",
+    )
+    rotor_color = DeclareLaunchArgument(
+        "rotor_color",
+        default_value="0.0 1.0 0.0 1.0",  # Default Green color
+        description="Rotor color for the robot",
+    )
+
     namespace = LaunchConfiguration("robot_ns")
 
     return LaunchDescription(
-        [name_argument, OpaqueFunction(function=spawn_robot, args=[namespace])]
+        [
+            name_argument,
+            body_color,
+            rotor_color,
+            OpaqueFunction(function=spawn_robot, args=[namespace, body_color, rotor_color]),
+        ]
     )
