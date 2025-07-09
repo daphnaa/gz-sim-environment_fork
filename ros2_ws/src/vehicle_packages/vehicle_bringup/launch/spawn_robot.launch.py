@@ -21,7 +21,7 @@ robot_coordinates = {
     5: [7.0, 8.0, 1.65]
 }
 
-robot_model_type = "typhoon_drone"
+robot_model_type = "drone_model"  # type of the robot model to spawn
 # you can choose from:
 # model, model_with_2_lidar, small_vehicle, small_vehicle_vert_lidar, small_vehicle_2d_lidar
 

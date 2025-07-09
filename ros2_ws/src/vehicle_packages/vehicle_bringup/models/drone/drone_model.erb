@@ -1,0 +1,330 @@
+<?xml version="1.0" ?>
+<sdf version="1.9">
+  <%
+    # Ruby variables for customization
+    # These can be overridden by the Ruby script if needed, or set as defaults here.
+    # For this example, we'll assume model_name, x_pose, y_pose are passed from the script.
+    # Other parameters are defaults here.
+
+    # Drone body parameters
+    base_length = 0.4
+    base_width = 0.4
+    base_height = 0.1
+    base_mass = 1.5 # kg
+
+    # Rotor parameters
+    num_rotors = 4
+    rotor_radius = 0.1
+    rotor_height = 0.01
+    rotor_mass = 0.05 # kg
+    max_rot_vel = 1000.0 # rad/s
+    motor_constant = 0.00000000002
+    moment_constant = 0.000000000001
+    rotor_drag_coefficient = 0.0000000000001
+
+    # Rotor positions relative to base_link center (x, y, z)
+    # Assuming a quadcopter configuration
+    rotor_offsets = [
+      [0.2, 0.2, 0.05],   # Front Right
+      [-0.2, 0.2, 0.05],  # Rear Right
+      [-0.2, -0.2, 0.05], # Rear Left
+      [0.2, -0.2, 0.05]    # Front Left
+    ]
+    # Rotor turning directions (1 for CW, -1 for CCW)
+    rotor_directions = [1, -1, 1, -1]
+
+    # Camera parameters
+    camera_link_offset_x = 0.15 # Offset from base_link center
+    camera_link_offset_y = 0.0
+    camera_link_offset_z = 0.05
+    camera_mass = 0.01 # kg
+
+    rgb_camera_horizontal_fov = 1.047 # radians (60 degrees)
+    rgb_camera_image_width = 640
+    rgb_camera_image_height = 480
+    rgb_camera_update_rate = 30.0
+
+    depth_camera_horizontal_fov = 1.047 # radians (60 degrees)
+    depth_camera_image_width = 640
+    depth_camera_image_height = 480
+    depth_camera_update_rate = 30.0
+    depth_camera_range_min = 0.1
+    depth_camera_range_max = 10.0
+  %>
+
+  <model name="<%= model_name %>">
+    <!-- The initial pose of the model is handled by the spawning mechanism
+         (e.g., ros_gz_sim_create or spawn_entity) and is not defined here
+         within the <model> tag itself. -->
+
+    <!-- Base Link of the Drone -->
+    <link name="base_link">
+      <inertial>
+        <mass><%= base_mass %></mass>
+        <inertia>
+          <ixx><%= (base_mass/12.0) * (base_height**2 + base_width**2) %></ixx>
+          <iyy><%= (base_mass/12.0) * (base_length**2 + base_height**2) %></iyy>
+          <izz><%= (base_mass/12.0) * (base_length**2 + base_width**2) %></izz>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyz>0.0</iyz>
+        </inertia>
+      </inertial>
+      <visual name="base_visual">
+        <geometry>
+          <box>
+            <size><%= base_length %> <%= base_width %> <%= base_height %></size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.1 0.1 0.1 1</ambient>
+          <diffuse>0.3 0.3 0.3 1</diffuse>
+          <specular>0.01 0.01 0.01 1</specular>
+        </material>
+      </visual>
+      <collision name="base_collision">
+        <geometry>
+          <box>
+            <size><%= base_length %> <%= base_width %> <%= base_height %></size>
+          </box>
+        </geometry>
+      </collision>
+
+      <!-- IMU Sensor Definition (plugin is at model level) -->
+      <sensor name="imu_sensor" type="imu">
+        <always_on>true</always_on>
+        <update_rate>100</update_rate>
+        <imu>
+          <angular_velocity>
+            <x>0.001</x>
+            <y>0.001</y>
+            <z>0.001</z>
+          </angular_velocity>
+          <linear_acceleration>
+            <x>0.01</x>
+            <y>0.01</y>
+            <z>0.01</z>
+          </linear_acceleration>
+        </imu>
+        <pose>0 0 0 0 0 0</pose>
+      </sensor>
+
+      <!-- Air Pressure Sensor Definition (plugin is at model level) -->
+      <sensor name="air_pressure_sensor" type="air_pressure">
+        <always_on>true</always_on>
+        <update_rate>10</update_rate>
+        <air_pressure>
+          <pressure>101325</pressure>
+          <pressure_stddev>1.0</pressure_stddev>
+          <temperature>298.15</temperature>
+          <temperature_stddev>0.1</temperature_stddev>
+        </air_pressure>
+        <pose>0 0 0 0 0 0</pose>
+      </sensor>
+
+      <!-- Magnetometer Sensor Definition (plugin is at model level) -->
+      <sensor name="magnetometer_sensor" type="magnetometer">
+        <always_on>true</always_on>
+        <update_rate>10</update_rate>
+        <magnetometer>
+          <x>0.0001</x>
+          <y>0.0001</y>
+          <z>0.0001</z>
+        </magnetometer>
+        <pose>0 0 0 0 0 0</pose>
+      </sensor>
+
+    </link>
+
+    <!-- Rotors and Motors -->
+    <% for i in 0..(num_rotors - 1) %>
+      <link name="rotor_<%= i %>_link">
+        <pose><%= rotor_offsets[i][0] %> <%= rotor_offsets[i][1] %> <%= rotor_offsets[i][2] %> 0 0 0</pose>
+        <inertial>
+          <mass><%= rotor_mass %></mass>
+          <inertia>
+            <ixx><%= 0.5 * rotor_mass * rotor_radius**2 %></ixx>
+            <iyy><%= 0.5 * rotor_mass * rotor_radius**2 %></iyy>
+            <izz><%= 0.25 * rotor_mass * rotor_radius**2 %></izz>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyz>0</iyz>
+          </inertia>
+        </inertial>
+        <visual name="rotor_<%= i %>_visual">
+          <geometry>
+            <cylinder>
+              <radius><%= rotor_radius %></radius>
+              <length><%= rotor_height %></length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.8 0.0 0.0 1</ambient>
+            <diffuse>0.8 0.0 0.0 1</diffuse>
+            <specular>0.01 0.01 0.01 1</specular>
+          </material>
+        </visual>
+        <collision name="rotor_<%= i %>_collision">
+          <geometry>
+            <cylinder>
+              <radius><%= rotor_radius %></radius>
+              <length><%= rotor_height %></length>
+            </cylinder>
+          </geometry>
+        </collision>
+      </link>
+
+      <joint name="rotor_<%= i %>_joint" type="revolute">
+        <parent>base_link</parent>
+        <child>rotor_<%= i %>_link</child>
+        <axis>
+          <xyz>0 0 <%= rotor_directions[i] %></xyz>
+        </axis>
+        <limit>
+          <lower>-1e16</lower>
+          <upper>1e16</upper>
+        </limit>
+      </joint>
+    <% end %>
+
+    <!-- Camera Link (for both RGB and Depth cameras) -->
+    <link name="camera_link">
+      <pose><%= camera_link_offset_x %> <%= camera_link_offset_y %> <%= camera_link_offset_z %> 0 0 0</pose>
+      <inertial>
+        <mass><%= camera_mass %></mass>
+        <inertia>
+          <ixx><%= (camera_mass/12.0) * (0.05**2 + 0.05**2) %></ixx>
+          <iyy><%= (camera_mass/12.0) * (0.05**2 + 0.05**2) %></iyy>
+          <izz><%= (camera_mass/12.0) * (0.05**2 + 0.05**2) %></izz>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyz>0.0</iyz>
+        </inertia>
+      </inertial>
+      <visual name="camera_visual">
+        <geometry>
+          <box>
+            <size>0.05 0.05 0.05</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.0 0.8 0.8 1</ambient>
+          <diffuse>0.0 0.8 0.8 1</diffuse>
+          <specular>0.01 0.01 0.01 1</specular>
+        </material>
+      </visual>
+      <collision name="camera_collision">
+        <geometry>
+          <box>
+            <size>0.05 0.05 0.05</size>
+          </box>
+        </geometry>
+      </collision>
+
+      <!-- RGB Camera Sensor Definition (plugin is at model level) -->
+      <sensor name="rgb_camera_sensor" type="camera">
+        <always_on>true</always_on>
+        <update_rate><%= rgb_camera_update_rate %></update_rate>
+        <camera>
+          <horizontal_fov><%= rgb_camera_horizontal_fov %></horizontal_fov>
+          <image>
+            <width><%= rgb_camera_image_width %></width>
+            <height><%= rgb_camera_image_height %></height>
+            <format>R8G8B8</format>
+          </image>
+          <clip>
+            <near>0.01</near>
+            <far>100</far>
+          </clip>
+          <save enabled="false">
+            <path>/tmp</path>
+          </save>
+        </camera>
+        <pose>0 0 0 0 0 0</pose>
+      </sensor>
+
+      <!-- Depth Camera Sensor Definition (plugin is at model level) -->
+      <sensor name="depth_camera_sensor" type="depth_camera">
+        <always_on>true</always_on>
+        <update_rate><%= depth_camera_update_rate %></update_rate>
+        <camera>
+          <horizontal_fov><%= depth_camera_horizontal_fov %></horizontal_fov>
+          <image>
+            <width><%= depth_camera_image_width %></width>
+            <height><%= depth_camera_image_height %></height>
+            <format>R_FLOAT32</format>
+          </image>
+          <clip>
+            <near><%= depth_camera_range_min %></near>
+            <far><%= depth_camera_range_max %></far>
+          </clip>
+          <save enabled="false">
+            <path>/tmp</path>
+          </save>
+        </camera>
+        <pose>0 0 0 0 0 0</pose>
+      </sensor>
+    </link>
+
+    <joint name="base_to_camera_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>camera_link</child>
+    </joint>
+
+    <!-- System Plugins (moved to model level) -->
+    <% for i in 0..(num_rotors - 1) %>
+      <plugin
+        filename="gz-sim-motors-system"
+        name="gz::sim::systems::Motor">
+        <joint_name>rotor_<%= i %>_joint</joint_name>
+        <motor_number><%= i %></motor_number>
+        <turning_direction><%= rotor_directions[i] == 1 ? "cw" : "ccw" %></turning_direction>
+        <max_rot_vel><%= max_rot_vel %></max_rot_vel>
+        <motor_constant><%= motor_constant %></motor_constant>
+        <moment_constant><%= moment_constant %></moment_constant>
+        <rotor_drag_coefficient><%= rotor_drag_coefficient %></rotor_drag_coefficient>
+        <command_sub_topic><%= model_name %>/motor_speed</command_sub_topic>
+        <motor_force_topic><%= model_name %>/motor_force_<%= i %></motor_force_topic>
+        <motor_torque_topic><%= model_name %>/motor_torque_<%= i %></motor_torque_topic>
+      </plugin>
+    <% end %>
+
+    <plugin
+      filename="gz-sim-imu-system"
+      name="gz::sim::systems::Imu">
+      <link_name>base_link</link_name>
+      <topic><%= model_name %>/imu</topic>
+    </plugin>
+
+    <plugin
+      filename="gz-sim-air-pressure-system"
+      name="gz::sim::systems::AirPressure">
+      <link_name>base_link</link_name>
+      <topic><%= model_name %>/air_pressure</topic>
+    </plugin>
+
+    <plugin
+      filename="gz-sim-magnetometer-system"
+      name="gz::sim::systems::Magnetometer">
+      <link_name>base_link</link_name>
+      <topic><%= model_name %>/magnetometer</topic>
+    </plugin>
+
+    <plugin
+      filename="gz-sim-camera-system"
+      name="gz::sim::systems::Camera">
+      <link_name>camera_link</link_name>
+      <topic><%= model_name %>/camera/rgb/image</topic>
+      <camera_info_topic><%= model_name %>/camera/rgb/camera_info</camera_info_topic>
+    </plugin>
+
+    <plugin
+      filename="gz-sim-depth-camera-system"
+      name="gz::sim::systems::DepthCamera">
+      <link_name>camera_link</link_name>
+      <topic><%= model_name %>/camera/depth/image</topic>
+      <camera_info_topic><%= model_name %>/camera/depth/camera_info</camera_info_topic>
+    </plugin>
+
+  </model>
+</sdf>
