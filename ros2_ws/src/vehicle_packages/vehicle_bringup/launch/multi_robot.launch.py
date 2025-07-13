@@ -62,4 +62,4 @@ def generate_launch_description():
             gz_sim,
             topic_bridge,
         ] + spawn_robots
-    )
+        ) 

@@ -13,9 +13,9 @@ robot_coordinates = {
     # 0: [-1.0, -1.0, 1.65], 
     # 0: [-5.0, 0.0, 2.5], # cave world
     # 0: [-15.0, -15.0, 2.5], # marsyard
-    0: [1.0, -0.5, 1.0], # corridor
-    1: [7.0, 1.0, 1.0],
-    2: [5.0, -0.5, 2.0],
+    0: [-5.0, -7.0, 1.0], # corridor
+    1: [-1.0, 0.0, 1.65],
+    2: [5.0, 5.0, 1.65],
     3: [-1.0, 8.0, 1.65],
     4: [7.0, 8.0, 1.65],
     5: [7.0, 8.0, 1.65]
@@ -25,7 +25,7 @@ robot_model_type = "small_vehicle"
 # you can choose from:
 # model, model_with_2_lidar, small_vehicle, small_vehicle_vert_lidar, small_vehicle_2d_lidar
 
-def spawn_robot(context: LaunchContext, namespace: LaunchConfiguration, body_color: LaunchConfiguration, rotor_color: LaunchConfiguration):
+def spawn_robot(context: LaunchContext, namespace: LaunchConfiguration):
     pkg_project_description = get_package_share_directory("vehicle_bringup")
     robot_ns = namespace.perform(context)
     if(robot_ns == ""):
